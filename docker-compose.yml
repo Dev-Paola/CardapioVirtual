@@ -1,0 +1,46 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: cardapio_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: cardapio
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  redis:
+    image: redis:alpine
+    container_name: cardapio_redis
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: ./cardapio-backend
+      dockerfile: Dockerfile
+    container_name: cardapio_backend
+    volumes:
+      - ./cardapio-backend:/var/www
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+
+  queue-worker:
+    build:
+      context: ./cardapio-backend
+      dockerfile: Dockerfile
+    container_name: cardapio_queue_worker
+    command: php artisan queue:work redis --tries=3 --timeout=90
+    volumes:
+      - ./cardapio-backend:/var/www
+    depends_on:
+      - backend
+      - redis
+
+volumes:
+  db_data:
