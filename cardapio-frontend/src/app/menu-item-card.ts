@@ -6,8 +6,7 @@ import { MenuItem } from './menu-item';
   selector: 'app-menu-item-card',
   standalone: true,
   imports: [CurrencyPipe],
-  templateUrl: './menu-item-card.html',
-  styleUrl: './menu-item-card.css'
+  templateUrl: './menu-item-card.html'
 })
 export class MenuItemCard {
   @Input({ required: true }) item!: MenuItem;

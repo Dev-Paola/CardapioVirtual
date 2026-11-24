@@ -5,8 +5,7 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-menu-search',
   standalone: true,
   imports: [FormsModule],
-  templateUrl: './menu-search.html',
-  styleUrl: './menu-search.css'
+  templateUrl: './menu-search.html'
 })
 export class MenuSearch {
   @Input() searchTerm: string = '';

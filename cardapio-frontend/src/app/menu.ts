@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { catchError, map, of, Subject, switchMap } from 'rxjs';
 import { CartService } from './cart.service';
+import { MenuApiService, MenuSearchResponse } from './menu-api.service';
 import { MenuItemCard } from './menu-item-card';
 import { MenuItem } from './menu-item';
 import { MenuSearch } from './menu-search';
@@ -8,9 +10,8 @@ import { MenuSearch } from './menu-search';
 @Component({
   selector: 'app-menu',
   standalone: true,
-  imports: [],
+  imports: [MenuItemCard, MenuSearch],
   templateUrl: './menu.html',
-  styleUrl: './menu.css'
 })
 export class Menu {
   searchTerm: string = '';
@@ -48,33 +49,44 @@ export class Menu {
   ];
 
   filteredItems: MenuItem[] = [...this.menuItems];
+  isLoading = false;
+  apiUnavailable = false;
+  private readonly searchRequests = new Subject<string>();
 
   constructor(
     private readonly router: Router,
-    private readonly cartService: CartService
-  ) {}
+    private readonly cartService: CartService,
+    private readonly menuApi: MenuApiService
+  ) {
+    this.searchRequests.pipe(
+      switchMap((term) => {
+        this.isLoading = true;
+        return this.menuApi.search(term).pipe(
+          map((response) => ({ response, term })),
+          catchError(() => of({ response: null, term }))
+        );
+      })
+    ).subscribe(({ response, term }) => {
+      this.isLoading = false;
+      this.apiUnavailable = response === null;
+
+      if (response) {
+        this.applyApiResponse(response, term);
+        return;
+      }
+
+      this.applyLocalSearch(term);
+    });
+
+    this.searchRequests.next('');
+  }
 
   onSearch(searchTerm: string = this.searchTerm): void {
     const term = searchTerm.trim();
     this.searchTerm = searchTerm;
 
-    if (!term) {
-      this.filteredItems = [...this.menuItems];
-      return;
-    }
-
-    this.recentSearches = [
-      term,
-      ...this.recentSearches.filter((item) => item.toLowerCase() !== term.toLowerCase())
-    ].slice(0, 5);
-
-    const lowerTerm = term.toLowerCase();
-    this.filteredItems = this.menuItems.filter(
-      (item) =>
-        item.name.toLowerCase().includes(lowerTerm) ||
-        item.category.toLowerCase().includes(lowerTerm) ||
-        item.description.toLowerCase().includes(lowerTerm)
-    );
+    if (term) this.addRecentSearch(term);
+    this.searchRequests.next(term);
   }
 
   select(term: string): void {
@@ -85,5 +97,33 @@ export class Menu {
   addToCart(item: MenuItem): void {
     this.cartService.add(item);
     void this.router.navigate(['/carrinho']);
+  }
+
+  private applyApiResponse(response: MenuSearchResponse, term: string): void {
+    this.menuItems = response.results.map((product) => this.menuApi.toMenuItem(product));
+    this.filteredItems = [...this.menuItems];
+    this.recentSearches = [...response.recent_searches, ...this.recentSearches]
+      .filter((search, index, searches) =>
+        searches.findIndex((value) => value.toLowerCase() === search.toLowerCase()) === index
+      )
+      .slice(0, 5);
+    if (term) this.addRecentSearch(term);
+  }
+
+  private applyLocalSearch(term: string): void {
+    const lowerTerm = term.toLowerCase();
+    this.filteredItems = this.menuItems.filter(
+      (item) =>
+        item.name.toLowerCase().includes(lowerTerm) ||
+        item.category.toLowerCase().includes(lowerTerm) ||
+        item.description.toLowerCase().includes(lowerTerm)
+    );
+  }
+
+  private addRecentSearch(term: string): void {
+    this.recentSearches = [
+      term,
+      ...this.recentSearches.filter((item) => item.toLowerCase() !== term.toLowerCase())
+    ].slice(0, 5);
   }
 }

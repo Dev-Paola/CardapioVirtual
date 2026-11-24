@@ -1,5 +1,8 @@
-<section class="search-section">
-  <form (ngSubmit)="searchSubmitted.emit(searchTerm)" class="search-bar">
+<section>
+  <form
+    (ngSubmit)="searchSubmitted.emit(searchTerm)"
+    class="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-2 shadow-sm transition focus-within:border-red-600 focus-within:ring-4 focus-within:ring-red-50 sm:flex-row"
+  >
     <input
       type="text"
       name="searchTerm"
@@ -7,16 +10,26 @@
       (ngModelChange)="searchTermChange.emit($event)"
       placeholder="Ex: Hambúrguer, Pizza, Bacon..."
       aria-label="Buscar no cardápio"
+      class="min-w-0 flex-1 rounded-lg bg-transparent px-3 py-2.5 text-slate-800 outline-none placeholder:text-slate-400"
     />
-    <button type="submit">Buscar</button>
+    <button
+      class="rounded-lg bg-red-600 px-6 py-2.5 font-semibold text-white transition hover:bg-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+      type="submit"
+    >
+      Buscar
+    </button>
   </form>
 
   @if (recentSearches.length > 0) {
-    <div class="recent-searches">
-      <span>Buscas recentes:</span>
-      <div class="tags">
+    <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
+      <span class="text-sm font-medium text-slate-500">Buscas recentes:</span>
+      <div class="flex flex-wrap justify-center gap-2">
         @for (recent of recentSearches; track recent) {
-          <button type="button" class="tag-btn" (click)="recentSearchSelected.emit(recent)">
+          <button
+            class="rounded-full border border-slate-300 bg-white px-3 py-1 text-sm font-medium text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+            type="button"
+            (click)="recentSearchSelected.emit(recent)"
+          >
             {{ recent }}
           </button>
         }

@@ -2,17 +2,13 @@
 
 namespace App\Services;
 
-use Ds\Deque;
-
 class SearchHistoryService
 {
-    protected Deque $history;
+    protected array $history = [];
     protected int $maxLimit;
 
     public function __construct(int $maxLimit = 10)
     {
-        // Inicializa o Deque otimizado em C da extensão ext-ds
-        $this->history = new Deque();
         $this->maxLimit = $maxLimit;
     }
 
@@ -26,17 +22,12 @@ class SearchHistoryService
             return;
         }
 
-        // Remove duplicados se já existirem para reordenar no topo
-        $filtered = $this->history->filter(fn($item) => $item !== $term);
-        $this->history = $filtered;
-
-        // Adiciona no início do Deque
-        $this->history->unshift($term);
-
-        // Limita o tamanho máximo do histórico
-        if ($this->history->count() > $this->maxLimit) {
-            $this->history->pop(); // Remove o elemento mais antigo do fim
-        }
+        $this->history = array_values(array_filter(
+            $this->history,
+            fn (string $item): bool => $item !== $term,
+        ));
+        array_unshift($this->history, $term);
+        $this->history = array_slice($this->history, 0, $this->maxLimit);
     }
 
     /**
@@ -44,6 +35,6 @@ class SearchHistoryService
      */
     public function getRecentSearches(): array
     {
-        return $this->history->toArray();
+        return $this->history;
     }
 }

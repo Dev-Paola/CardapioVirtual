@@ -1,37 +1,73 @@
-<main class="cart-container">
-  <header class="cart-header">
-    <h1>Meu carrinho</h1>
-    <a routerLink="/">Voltar ao cardápio</a>
-  </header>
+<main class="min-h-screen px-4 py-8 sm:px-6 sm:py-10">
+  <div class="mx-auto max-w-4xl">
+    <header class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <h1 class="text-3xl font-bold tracking-tight text-slate-900">Meu carrinho</h1>
+      <a class="font-semibold text-red-600 hover:text-red-700" routerLink="/">Voltar ao cardápio</a>
+    </header>
 
-  @if (cart.items.length > 0) {
-    <section class="cart-items" aria-label="Itens do carrinho">
-      @for (cartItem of cart.items; track cartItem.item.id) {
-        <article class="cart-item">
-          <div class="item-info">
-            <h2>{{ cartItem.item.name }}</h2>
-            <p>{{ cartItem.item.price | currency:'BRL':'symbol':'1.2-2' }} por unidade</p>
-          </div>
-          <div class="item-actions">
-            <button type="button" aria-label="Diminuir quantidade" (click)="cart.decrease(cartItem.item.id)">−</button>
-            <span aria-live="polite">{{ cartItem.quantity }}</span>
-            <button type="button" aria-label="Aumentar quantidade" (click)="cart.add(cartItem.item)">+</button>
-            <button type="button" class="remove-button" (click)="cart.remove(cartItem.item.id)">Remover</button>
-          </div>
-          <strong>{{ cartItem.item.price * cartItem.quantity | currency:'BRL':'symbol':'1.2-2' }}</strong>
-        </article>
-      }
-    </section>
+    @if (cart.items.length > 0) {
+      <section class="grid gap-3" aria-label="Itens do carrinho">
+        @for (cartItem of cart.items; track cartItem.item.id) {
+          <article class="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center">
+            <div class="min-w-0 flex-1">
+              <h2 class="font-semibold text-slate-900">{{ cartItem.item.name }}</h2>
+              <p class="mt-1 text-sm text-slate-500">{{ cartItem.item.price | currency:'BRL':'symbol':'1.2-2' }} por unidade</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                class="grid size-9 place-items-center rounded-lg border border-slate-300 bg-white text-lg text-slate-700 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                type="button"
+                aria-label="Diminuir quantidade"
+                (click)="cart.decrease(cartItem.item.id)"
+              >
+                −
+              </button>
+              <span class="min-w-6 text-center font-medium tabular-nums" aria-live="polite">{{ cartItem.quantity }}</span>
+              <button
+                class="grid size-9 place-items-center rounded-lg border border-slate-300 bg-white text-lg text-slate-700 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                type="button"
+                aria-label="Aumentar quantidade"
+                (click)="cart.add(cartItem.item)"
+              >
+                +
+              </button>
+              <button
+                class="rounded-lg px-2 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
+                type="button"
+                (click)="cart.remove(cartItem.item.id)"
+              >
+                Remover
+              </button>
+            </div>
+            <strong class="text-right font-semibold text-slate-900 sm:min-w-24">
+              {{ cartItem.item.price * cartItem.quantity | currency:'BRL':'symbol':'1.2-2' }}
+            </strong>
+          </article>
+        }
+      </section>
 
-    <footer class="cart-total">
-      <span>Total</span>
-      <strong>{{ cart.total | currency:'BRL':'symbol':'1.2-2' }}</strong>
-      <a class="checkout-button" routerLink="/compra">Finalizar pagamento</a>
-    </footer>
-  } @else {
-    <section class="empty-cart">
-      <p>Seu carrinho está vazio.</p>
-      <a routerLink="/">Escolher itens</a>
-    </section>
-  }
+      <footer class="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-slate-300 pt-5">
+        <div class="flex items-center gap-3 text-lg">
+          <span class="text-slate-600">Total</span>
+          <strong class="text-slate-900">{{ cart.total | currency:'BRL':'symbol':'1.2-2' }}</strong>
+        </div>
+        <a
+          class="inline-flex items-center justify-center rounded-lg bg-red-600 px-5 py-3 font-semibold text-white transition hover:bg-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+          routerLink="/compra"
+        >
+          Finalizar pagamento
+        </a>
+      </footer>
+    } @else {
+      <section class="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
+        <p class="mb-5 text-slate-600">Seu carrinho está vazio.</p>
+        <a
+          class="inline-flex rounded-lg bg-red-600 px-5 py-2.5 font-semibold text-white hover:bg-red-700"
+          routerLink="/"
+        >
+          Escolher itens
+        </a>
+      </section>
+    }
+  </div>
 </main>

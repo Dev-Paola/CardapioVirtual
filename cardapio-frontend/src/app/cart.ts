@@ -7,8 +7,7 @@ import { CartService } from './cart.service';
   selector: 'app-cart',
   standalone: true,
   imports: [CurrencyPipe, RouterLink],
-  templateUrl: './cart.html',
-  styleUrl: './cart.css'
+  templateUrl: './cart.html'
 })
 export class Cart {
   constructor(readonly cart: CartService) {}
