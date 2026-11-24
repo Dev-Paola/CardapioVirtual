@@ -1,0 +1,141 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  color: #1f2937;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.checkout-container {
+  max-width: 1020px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem;
+}
+
+.checkout-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.checkout-header h1 {
+  margin: 0;
+  color: #111827;
+  font-size: 2rem;
+}
+
+.checkout-header a,
+.checkout-link {
+  color: #ea1d2c;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.checkout-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.8fr);
+  align-items: start;
+  gap: 1.25rem;
+}
+
+.payment-panel,
+.order-summary,
+.order-confirmation,
+.empty-checkout {
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.payment-panel h2,
+.order-summary h2,
+.order-confirmation h2 {
+  margin: 0 0 1.25rem;
+  color: #111827;
+  font-size: 1.25rem;
+}
+
+.payment-panel form {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.payment-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.payment-option:has(input:checked) {
+  border-color: #ea1d2c;
+  background-color: #fef2f2;
+}
+
+.payment-option input {
+  margin-top: 0.25rem;
+  accent-color: #ea1d2c;
+}
+
+.payment-option span {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.payment-option small {
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.confirm-button {
+  justify-self: start;
+  margin-top: 0.5rem;
+}
+
+.summary-item,
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.summary-item {
+  margin-bottom: 0.8rem;
+  color: #4b5563;
+}
+
+.summary-total {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #d1d5db;
+  font-size: 1.1rem;
+}
+
+.order-confirmation,
+.empty-checkout {
+  text-align: center;
+}
+
+.order-confirmation p,
+.empty-checkout p {
+  margin-bottom: 1.25rem;
+  color: #4b5563;
+}
+
+@media (max-width: 700px) {
+  .checkout-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .checkout-layout {
+    grid-template-columns: 1fr;
+  }
+}

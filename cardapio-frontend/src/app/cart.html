@@ -1,0 +1,37 @@
+<main class="cart-container">
+  <header class="cart-header">
+    <h1>Meu carrinho</h1>
+    <a routerLink="/">Voltar ao cardápio</a>
+  </header>
+
+  @if (cart.items.length > 0) {
+    <section class="cart-items" aria-label="Itens do carrinho">
+      @for (cartItem of cart.items; track cartItem.item.id) {
+        <article class="cart-item">
+          <div class="item-info">
+            <h2>{{ cartItem.item.name }}</h2>
+            <p>{{ cartItem.item.price | currency:'BRL':'symbol':'1.2-2' }} por unidade</p>
+          </div>
+          <div class="item-actions">
+            <button type="button" aria-label="Diminuir quantidade" (click)="cart.decrease(cartItem.item.id)">−</button>
+            <span aria-live="polite">{{ cartItem.quantity }}</span>
+            <button type="button" aria-label="Aumentar quantidade" (click)="cart.add(cartItem.item)">+</button>
+            <button type="button" class="remove-button" (click)="cart.remove(cartItem.item.id)">Remover</button>
+          </div>
+          <strong>{{ cartItem.item.price * cartItem.quantity | currency:'BRL':'symbol':'1.2-2' }}</strong>
+        </article>
+      }
+    </section>
+
+    <footer class="cart-total">
+      <span>Total</span>
+      <strong>{{ cart.total | currency:'BRL':'symbol':'1.2-2' }}</strong>
+      <a class="checkout-button" routerLink="/compra">Finalizar pagamento</a>
+    </footer>
+  } @else {
+    <section class="empty-cart">
+      <p>Seu carrinho está vazio.</p>
+      <a routerLink="/">Escolher itens</a>
+    </section>
+  }
+</main>

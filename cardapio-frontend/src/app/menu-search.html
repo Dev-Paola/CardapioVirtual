@@ -1,0 +1,26 @@
+<section class="search-section">
+  <form (ngSubmit)="searchSubmitted.emit(searchTerm)" class="search-bar">
+    <input
+      type="text"
+      name="searchTerm"
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="searchTermChange.emit($event)"
+      placeholder="Ex: Hambúrguer, Pizza, Bacon..."
+      aria-label="Buscar no cardápio"
+    />
+    <button type="submit">Buscar</button>
+  </form>
+
+  @if (recentSearches.length > 0) {
+    <div class="recent-searches">
+      <span>Buscas recentes:</span>
+      <div class="tags">
+        @for (recent of recentSearches; track recent) {
+          <button type="button" class="tag-btn" (click)="recentSearchSelected.emit(recent)">
+            {{ recent }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+</section>

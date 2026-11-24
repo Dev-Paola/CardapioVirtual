@@ -1,0 +1,77 @@
+<main class="checkout-container">
+  <header class="checkout-header">
+    <h1>Finalizar compra</h1>
+    <a routerLink="/carrinho">Voltar ao carrinho</a>
+  </header>
+
+  @if (orderConfirmed) {
+    <section class="order-confirmation" role="status">
+      <h2>Pedido recebido!</h2>
+      <p>Total: <strong>{{ confirmedTotal | currency:'BRL':'symbol':'1.2-2' }}</strong></p>
+      @switch (confirmedPayment) {
+        @case ('pix') {
+          <p>O estabelecimento informará os dados do Pix para pagamento.</p>
+        }
+        @case ('cash') {
+          <p>O pagamento será feito em dinheiro na entrega.</p>
+        }
+        @case ('card') {
+          <p>O pagamento será feito com cartão na entrega.</p>
+        }
+      }
+      <a class="checkout-link" routerLink="/">Voltar ao cardápio</a>
+    </section>
+  } @else if (cart.items.length > 0) {
+    <div class="checkout-layout">
+      <section class="payment-panel">
+        <h2>Forma de pagamento</h2>
+        <form (ngSubmit)="confirmOrder()">
+          <label class="payment-option">
+            <input type="radio" name="paymentMethod" value="pix" [(ngModel)]="paymentMethod" />
+            <span>
+              <strong>Pix</strong>
+              <small>Os dados para pagamento serão informados pelo estabelecimento.</small>
+            </span>
+          </label>
+
+          <label class="payment-option">
+            <input type="radio" name="paymentMethod" value="cash" [(ngModel)]="paymentMethod" />
+            <span>
+              <strong>Dinheiro na entrega</strong>
+              <small>Pague em dinheiro quando receber o pedido.</small>
+            </span>
+          </label>
+
+          <label class="payment-option">
+            <input type="radio" name="paymentMethod" value="card" [(ngModel)]="paymentMethod" />
+            <span>
+              <strong>Cartão na entrega</strong>
+              <small>Pague com cartão quando receber o pedido.</small>
+            </span>
+          </label>
+
+          <button class="confirm-button" type="submit">Confirmar pedido</button>
+        </form>
+      </section>
+
+      <aside class="order-summary">
+        <h2>Resumo do pedido</h2>
+        @for (cartItem of cart.items; track cartItem.item.id) {
+          <div class="summary-item">
+            <span>{{ cartItem.quantity }}× {{ cartItem.item.name }}</span>
+            <strong>{{ cartItem.item.price * cartItem.quantity | currency:'BRL':'symbol':'1.2-2' }}</strong>
+          </div>
+        }
+        <div class="summary-total">
+          <span>Total</span>
+          <strong>{{ cart.total | currency:'BRL':'symbol':'1.2-2' }}</strong>
+        </div>
+      </aside>
+    </div>
+  } @else {
+    <section class="empty-checkout">
+      <p>Seu carrinho está vazio.</p>
+      <a class="checkout-link" routerLink="/">Escolher itens</a>
+    </section>
+  }
+</main>

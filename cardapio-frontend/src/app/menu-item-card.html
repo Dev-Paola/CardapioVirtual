@@ -1,0 +1,9 @@
+<article class="menu-card">
+  <div class="card-header">
+    <span class="category-badge">{{ item.category }}</span>
+    <span class="price">{{ item.price | currency:'BRL':'symbol':'1.2-2' }}</span>
+  </div>
+  <h2>{{ item.name }}</h2>
+  <p class="description">{{ item.description }}</p>
+  <button type="button" (click)="addToCart.emit(item)">Adicionar ao carrinho</button>
+</article>

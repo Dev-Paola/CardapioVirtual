@@ -1,0 +1,40 @@
+<main class="container">
+  <header class="header">
+    <h1>Cardápio Digital</h1>
+    <p><i>Busque pelo nome do prato, categoria ou ingredientes</i></p>
+  </header>
+
+  <section class="menu-search">
+    <label for="menu-search-input">Buscar no cardápio</label>
+    <input
+      id="menu-search-input"
+      type="search"
+      [value]="searchTerm"
+      (input)="onSearch($any($event.target).value)"
+    />
+
+    @if (recentSearches.length) {
+    <div class="recent-searches">
+      @for (recentSearch of recentSearches; track recentSearch) {
+      <button type="button" (click)="select(recentSearch)">{{ recentSearch }}</button>
+      }
+    </div>
+    }
+  </section>
+
+  <section class="menu-grid">
+    @for (item of filteredItems; track item.id) {
+    <article class="menu-item-card">
+      <h2>{{ item.name }}</h2>
+      <p>{{ item.description }}</p>
+      <p>{{ item.price }}</p>
+      <button type="button" (click)="addToCart(item)">Adicionar ao carrinho</button>
+    </article>
+    } @empty {
+    <div class="empty-state">
+      <p>Nenhum item encontrado para "<strong>{{ searchTerm }}</strong>".</p>
+      <button type="button" (click)="select('')">Limpar filtro</button>
+    </div>
+    }
+  </section>
+</main>
