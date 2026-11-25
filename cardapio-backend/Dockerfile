@@ -11,8 +11,11 @@ RUN apt-get update && apt-get install -y \
 
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Instalação direta e segura do ext-ds compatível
-RUN pecl install ds-1.5.0 && docker-php-ext-enable ds
+# Instala as extensões PECL usadas pelo projeto e pelo worker Redis.
+RUN pecl install ds-1.5.0 \
+    && docker-php-ext-enable ds \
+    && pecl install redis \
+    && docker-php-ext-enable redis
 
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 

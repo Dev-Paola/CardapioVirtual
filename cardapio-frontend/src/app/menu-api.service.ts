@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, timeout } from 'rxjs';
 import { MenuItem } from './menu-item';
 
 interface ApiMenuProduct {
@@ -48,7 +48,9 @@ export class MenuApiService {
   }
 
   createOrder(order: CreateOrderRequest): Observable<CreateOrderResponse> {
-    return this.http.post<CreateOrderResponse>(`${this.apiUrl}/orders`, order);
+    return this.http.post<CreateOrderResponse>(`${this.apiUrl}/orders`, order).pipe(
+      timeout({ first: 30_000 })
+    );
   }
 
   toMenuItem(product: ApiMenuProduct): MenuItem {

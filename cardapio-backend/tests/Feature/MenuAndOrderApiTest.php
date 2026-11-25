@@ -69,6 +69,26 @@ class MenuAndOrderApiTest extends TestCase
         ]);
     }
 
+    public function test_order_accepts_pix_with_no_cash_change(): void
+    {
+        $category = Category::create(['name' => 'Lanches']);
+        $product = Product::create([
+            'category_id' => $category->id,
+            'name' => 'Sanduíche da casa',
+            'description' => 'Queijo artesanal',
+            'price' => 28.90,
+            'is_active' => true,
+        ]);
+
+        $this->postJson('/api/orders', [
+            'items' => [['product_id' => $product->id, 'quantity' => 1]],
+            'payment_method' => 'pix',
+            'change_for' => null,
+        ])->assertCreated()
+            ->assertJsonPath('order.payment_method', 'pix')
+            ->assertJsonPath('order.change_for', null);
+    }
+
     public function test_order_rejects_cash_change_less_than_the_server_calculated_total(): void
     {
         $category = Category::create(['name' => 'Lanches']);

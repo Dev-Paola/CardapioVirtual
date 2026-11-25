@@ -10,12 +10,23 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
 
   redis:
     image: redis:alpine
     container_name: cardapio_redis
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   backend:
     build:
@@ -24,11 +35,32 @@ services:
     container_name: cardapio_backend
     volumes:
       - ./cardapio-backend:/var/www
-    ports:
-      - "8000:8000"
+      - ./docker/php/opcache.ini:/usr/local/etc/php/conf.d/zz-opcache.ini:ro
+    expose:
+      - "9000"
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@fsockopen('127.0.0.1', 9000) ? 0 : 1);"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 60s
+
+  web:
+    image: nginx:alpine
+    container_name: cardapio_web
+    volumes:
+      - ./cardapio-backend:/var/www:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
 
   queue-worker:
     build:
@@ -38,9 +70,12 @@ services:
     command: php artisan queue:work redis --tries=3 --timeout=90
     volumes:
       - ./cardapio-backend:/var/www
+      - ./docker/php/opcache.ini:/usr/local/etc/php/conf.d/zz-opcache.ini:ro
     depends_on:
-      - backend
-      - redis
+      backend:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   db_data:

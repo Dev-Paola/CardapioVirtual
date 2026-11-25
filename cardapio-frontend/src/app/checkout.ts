@@ -1,11 +1,17 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { finalize, TimeoutError } from 'rxjs';
 import { CartService } from './cart.service';
 import { CreateOrderRequest, MenuApiService } from './menu-api.service';
 
 type PaymentMethod = CreateOrderRequest['payment_method'];
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
 
 @Component({
   selector: 'app-checkout',
@@ -26,7 +32,8 @@ export class Checkout {
 
   constructor(
     readonly cart: CartService,
-    private readonly menuApi: MenuApiService
+    private readonly menuApi: MenuApiService,
+    private readonly changeDetector: ChangeDetectorRef
   ) {}
 
   confirmOrder(): void {
@@ -41,7 +48,12 @@ export class Checkout {
       })),
       payment_method: this.paymentMethod,
       change_for: this.paymentMethod === 'delivery_cash' ? this.changeFor : null
-    }).subscribe({
+    }).pipe(
+      finalize(() => {
+        this.isSubmitting = false;
+        this.changeDetector.markForCheck();
+      })
+    ).subscribe({
       next: ({ order }) => {
         this.confirmedTotal = Number(order.total);
         this.confirmedPayment = order.payment_method;
@@ -49,13 +61,32 @@ export class Checkout {
         this.confirmedOrderId = order.id;
         this.cart.clear();
         this.orderConfirmed = true;
-        this.isSubmitting = false;
+        this.changeDetector.markForCheck();
       },
-      error: (error: { error?: { message?: string } }) => {
-        this.errorMessage = error.error?.message
-          ?? 'Não foi possível enviar o pedido. Verifique sua conexão e tente novamente.';
-        this.isSubmitting = false;
+      error: (error: unknown) => {
+        this.errorMessage = this.getOrderErrorMessage(error);
+        this.changeDetector.markForCheck();
       }
     });
+  }
+
+  private getOrderErrorMessage(error: unknown): string {
+    if (error instanceof TimeoutError) {
+      return 'A API demorou para confirmar o pedido. Verifique se ele foi registrado antes de tentar novamente.';
+    }
+
+    if (!(error instanceof HttpErrorResponse)) {
+      return 'Não foi possível confirmar o pedido. Tente novamente.';
+    }
+
+    if (error.status === 0) {
+      return 'Não foi possível conectar à API. Verifique a conexão e as configurações de CORS.';
+    }
+
+    if (isRecord(error.error) && typeof error.error['message'] === 'string') {
+      return error.error['message'];
+    }
+
+    return `Não foi possível enviar o pedido (HTTP ${error.status}).`;
   }
 }

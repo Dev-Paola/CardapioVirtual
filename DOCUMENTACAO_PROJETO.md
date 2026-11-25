@@ -8,7 +8,8 @@ Este guia descreve a pasta `C:\laragon\www`, que ja esta aberta como workspace n
 | --- | --- |
 | `cardapio-backend/` | API e estrutura de dados em Laravel/PHP. |
 | `cardapio-frontend/` | Interface do cardapio em Angular/TypeScript. |
-| `docker-compose.yml` | Define containers de MySQL, Redis, API Laravel e worker de fila. Nao define um container para o frontend. |
+| `docker-compose.yml` | Define MySQL, Redis, Laravel em PHP-FPM, Nginx para HTTP e worker de fila. Nao define um container para o frontend. |
+| `docker/` | Configuracoes do Nginx e do OPcache usados pelos containers. |
 | `index.php` | Pagina inicial do Laragon na raiz `www`; nao e a entrada da aplicacao Laravel. |
 | `DOCUMENTACAO_PROJETO.md` | Este mapa dos arquivos e do estado atual do projeto. |
 
@@ -18,17 +19,17 @@ Este guia descreve a pasta `C:\laragon\www`, que ja esta aberta como workspace n
 - O endpoint `POST /api/orders` valida os itens e a forma de pagamento, recalcula os precos com os dados do banco e persiste o pedido e seus itens.
 - O checkout limpa o carrinho somente depois que a API confirma a criacao do pedido. A confirmacao de pedido nao processa uma transacao financeira: Pix e pagamentos na entrega sao apenas registrados.
 - A busca consulta nome, descricao e categoria, mantendo o historico recente do `SearchHistoryService`.
-- O Docker Compose cria MySQL e Redis. O Laravel usa SQLite por padrao no `.env.example`; para usar MySQL, a configuracao local do backend precisa apontar para o servico `db`.
+- O Docker Compose aguarda MySQL, Redis e PHP-FPM ficarem saudaveis antes de iniciar os servicos dependentes. O Nginx publica a API em `http://localhost:8000` e encaminha `/index.php` para `backend:9000`; CORS e preflight sao respondidos pelo middleware do Laravel.
 
 ## Arquivos na raiz de `www`
 
 - `README.md`: atualmente contem apenas o titulo do repositorio.
-- `docker-compose.yml`: declara os servicos `db` (MySQL), `redis`, `backend` e `queue-worker`. As credenciais declaradas sao para desenvolvimento local; nao devem ser tratadas como configuracao de producao.
+- `docker-compose.yml`: declara os servicos `db` (MySQL), `redis`, `backend` (PHP-FPM), `web` (Nginx) e `queue-worker`, com verificacoes de prontidao para banco, Redis e PHP-FPM. As credenciais declaradas sao para desenvolvimento local; nao devem ser tratadas como configuracao de producao.
 - `index.php`: pagina de boas-vindas do Laragon, com deteccao de acesso local e exibicao de informacoes do PHP. Nao encaminha requisicoes para o Laravel ou Angular.
 - `package.json` e `package-lock.json`: manifest e lockfile npm da raiz. Esse pacote nao e o frontend Angular; para comandos da interface, use `cardapio-frontend/`.
 - `.idea/`: configuracoes do IDE JetBrains.
 - `node_modules/`: dependencias npm instaladas localmente; conteudo gerado, nao e codigo-fonte.
-- Os arquivos vazios `addSearchTerm('Hambúrguer')` e `getRecentSearches()` foram removidos.
+
 
 ## Backend: `cardapio-backend/`
 
@@ -38,9 +39,9 @@ Este guia descreve a pasta `C:\laragon\www`, que ja esta aberta como workspace n
 - `composer.json` / `composer.lock`: dependencias PHP e suas versoes travadas.
 - `package.json`: comandos e dependencias JS do Vite usado pelos recursos Laravel; e separado do `package.json` do Angular.
 - `vite.config.js`: configuracao do Vite para `resources/css/app.css` e `resources/js/app.js`.
-- `Dockerfile`: imagem PHP 8.3, extensoes PHP/MySQL e extensao `ds` usadas pelo container.
+- `Dockerfile`: imagem PHP 8.3, extensoes PHP/MySQL, `ds` e Redis usadas pelos containers.
 - `phpunit.xml`: configuracao do PHPUnit e ambiente SQLite em memoria para testes.
-- `.env.example`: exemplo de variaveis locais; o `.env` real e ignorado e nao deve ser compartilhado, pois pode conter segredos.
+- `.env.example`: exemplo de variaveis locais; o `.env` real e ignorado pelo Git e nao deve ser compartilhado, pois pode conter segredos.
 - `.gitignore`, `.gitattributes`, `.editorconfig` e `.npmrc`: regras de versionamento, atributos Git, formatacao e configuracao npm.
 - `AGENTS.md` e `CLAUDE.md`: orientacoes para ferramentas de desenvolvimento, nao sao carregadas pela aplicacao em tempo de execucao.
 - `README.md`: documentacao padrao do Laravel, ainda nao personalizada para o cardapio.
@@ -155,5 +156,3 @@ php artisan migrate
 php artisan db:seed
 php artisan serve
 ```
-
-Se ainda nao existir um `.env`, copie `.env.example` para `.env` antes de gerar a chave. O exemplo usa SQLite; para conectar ao MySQL do Docker, configure `DB_CONNECTION=mysql`, `DB_HOST=db` (ou `127.0.0.1` quando PHP roda fora do Docker), `DB_PORT=3306`, `DB_DATABASE=cardapio`, `DB_USERNAME=root` e a senha local de desenvolvimento configurada no servico `db` do `docker-compose.yml`. Com a API em container, use `docker compose up -d --build db backend` e `docker compose exec backend php artisan migrate --seed`; o servico `backend` publica HTTP em `http://localhost:8000`. Fora do Docker, inicie o banco com `docker compose up -d db`, rode `php artisan migrate --seed` e `php artisan serve`.
