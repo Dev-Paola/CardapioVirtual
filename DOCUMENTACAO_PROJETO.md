@@ -1,6 +1,6 @@
 # Documentacao do projeto `CardapioVirtual`
 
-Este guia descreve a pasta `C:\laragon\www`, que ja esta aberta como workspace no VS Code. O repositorio contem duas aplicacoes independentes: uma API Laravel e uma interface Angular.
+O repositorio contem duas aplicacoes independentes: uma API Laravel e uma interface Angular.
 
 ## Visao geral
 
