@@ -1,0 +1,45 @@
+<main class="min-h-screen px-4 py-8 sm:px-6 sm:py-10">
+  <div class="mx-auto max-w-5xl">
+    <header class="mb-8 text-center">
+      <h1 class="mb-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Cardápio Digital</h1>
+      <p class="text-slate-500">Busque pelo nome do prato, categoria ou ingredientes</p>
+    </header>
+
+    <app-menu-search
+      class="mx-auto mb-10 block max-w-2xl"
+      [searchTerm]="searchTerm"
+      [recentSearches]="recentSearches"
+      (searchTermChange)="onSearch($event)"
+      (searchSubmitted)="onSearch($event)"
+      (recentSearchSelected)="select($event)"
+    />
+
+    @if (apiUnavailable) {
+      <p class="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800" role="status">
+        API indisponível. Exibindo o cardápio de demonstração.
+      </p>
+    }
+    @if (isLoading) {
+      <p class="mb-5 text-center text-sm text-slate-500" role="status">Carregando cardápio...</p>
+    }
+
+    <section class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      @for (item of filteredItems; track item.id) {
+        <app-menu-item-card class="block h-full" [item]="item" (addToCart)="addToCart($event)" />
+      } @empty {
+        <div class="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
+          <p class="mb-5 text-slate-600">
+            Nenhum item encontrado para "<strong class="text-slate-900">{{ searchTerm }}</strong>".
+          </p>
+          <button
+            class="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+            type="button"
+            (click)="select('')"
+          >
+            Limpar filtro
+          </button>
+        </div>
+      }
+    </section>
+  </div>
+</main>
